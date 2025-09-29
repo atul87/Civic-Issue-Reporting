@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civic Issue Reporting – Jharkhand</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- App styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="brand">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Emblem_of_Jharkhand.svg/120px-Emblem_of_Jharkhand.svg.png"
+                alt="Jharkhand Emblem" class="emblem" />
+            <div>
+                <h1>Civic Issue Reporting</h1>
+                <p class="subtitle">Government of Jharkhand — Clean & Green Technology</p>
+            </div>
+        </div>
+
+        <div class="role-switch">
+            <label class="switch">
+                <input id="roleToggle" type="checkbox" />
+                <span class="slider"></span>
+            </label>
+            <span id="roleLabel">Citizen</span>
+        </div>
+    </header>
+
+    <main class="layout">
+        <!-- Citizen Panel -->
+        <section id="citizenPanel" class="panel">
+            <div class="panel-card">
+                <h2>Report an Issue</h2>
+                <form id="reportForm" class="report-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Category *</label>
+                            <select id="category" class="form-control" required>
+                                <option value="">Select</option>
+                                <option value="Pothole">Pothole</option>
+                                <option value="Streetlight">Streetlight</option>
+                                <option value="Garbage">Garbage</option>
+                                <option value="Water Leakage">Water Leakage</option>
+                                <option value="Illegal Dumping">Illegal Dumping</option>
+                                <option value="Tree/Green">Tree/Green</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Priority *</label>
+                            <select id="priority" class="form-control" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">Description</label>
+                            <textarea id="description" class="form-control" rows="3" maxlength="500"
+                                placeholder="Describe the issue in detail..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Attach Photo</label>
+                            <input id="photo" type="file" class="form-control" accept="image/*" />
+                            <small class="form-hint">Tip: use camera for clearer evidence</small>
+                            <img id="photoPreview" class="photo-preview hidden" alt="Photo preview" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Your Name *</label>
+                            <input type="text" id="reporterName" class="form-control" placeholder="Full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" id="reporterEmail" class="form-control" placeholder="email@example.com"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Phone *</label>
+                            <input type="tel" id="reporterPhone" class="form-control" placeholder="+91-9876543210"
+                                required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <div class="location-controls">
+                                <button id="locateBtn" type="button" class="btn btn--secondary">📍 Use My
+                                    Location</button>
+                                <span id="locationStatus" class="location-status">Location not set</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="map" class="map-container"></div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn--primary">Submit Report</button>
+                        <button type="reset" class="btn btn--outline">Reset</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel-card">
+                <h2>My Reports</h2>
+                <div class="toolbar">
+                    <input id="mySearch" type="search" class="form-control" placeholder="Search my reports..." />
+                    <select id="myStatusFilter" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="Submitted">Submitted</option>
+                        <option value="Acknowledged">Acknowledged</option>
+                        <option value="In-Progress">In-Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                </div>
+                <ul id="myReports" class="reports-list"></ul>
+            </div>
+        </section>
+
+        <!-- Admin Panel -->
+        <section id="adminPanel" class="panel hidden">
+            <div class="panel-card">
+                <h2>Incoming Reports</h2>
+                <div class="toolbar">
+                    <input id="adminSearch" type="search" class="form-control" placeholder="Search by ID, text..." />
+                    <select id="filterCategory" class="form-control">
+                        <option value="">All Categories</option>
+                    </select>
+                    <select id="filterStatus" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="Submitted">Submitted</option>
+                        <option value="Acknowledged">Acknowledged</option>
+                        <option value="In-Progress">In-Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                    <select id="filterPriority" class="form-control">
+                        <option value="">All Priority</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                    <button id="exportCsv" class="btn btn--secondary">Export CSV</button>
+                </div>
+
+                <div id="adminMap" class="map-container"></div>
+
+                <div class="table-wrapper">
+                    <table id="reportsTable" class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Created</th>
+                                <th>Category</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Dept</th>
+                                <th>Assigned To</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <h2>Analytics & SLA</h2>
+                <div class="analytics-grid">
+                    <div class="chart-container" style="position: relative; height: 300px;">
+                        <canvas id="chartByCategory" aria-label="Reports by Category"></canvas>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 300px;">
+                        <canvas id="chartAging" aria-label="Aging Buckets"></canvas>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 300px;">
+                        <canvas id="chartResolution" aria-label="Resolution Rate"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <small>© Department of Higher & Technical Education, Government of Jharkhand</small>
+    </footer>
+
+    <!-- Assignment Modal -->
+    <div id="assignModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Assign Task</h3>
+            <form id="assignForm">
+                <p class="modal-subtitle" id="assignReportId"></p>
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <select id="assignDept" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Assignee (staff name)</label>
+                    <input id="assignUser" type="text" class="form-control" placeholder="e.g., A. Kumar" />
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn--outline" onclick="closeAssignModal()">Cancel</button>
+                    <button type="submit" class="btn btn--primary">Assign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+    <script src="civi-api.js"></script>
+</body>
+
+</html>
